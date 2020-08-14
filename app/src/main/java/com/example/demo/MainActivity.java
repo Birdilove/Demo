@@ -5,10 +5,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -16,7 +14,6 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
     CheckBox one, two;
@@ -26,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
     Button button;
     RadioGroup radioGroup, radioGroup3;
     TextView textView;
-    int i,j,k;
+    int i,j,k, total;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,13 +31,14 @@ public class MainActivity extends AppCompatActivity {
         rOne = findViewById(R.id.radioButton3);
         rTwo = findViewById(R.id.radioButton4);
         rThree = findViewById(R.id.radioButton5);
-        rFour = findViewById(R.id.radioButton8);
-        rFive = findViewById(R.id.radioButton9);
+        rFour = findViewById(R.id.radioButton9);
+        rFive = findViewById(R.id.radioButton8);
         seekBar = findViewById(R.id.seekBar2);
         radioGroup = findViewById(R.id.radioGroup2);
         textView = findViewById(R.id.textView4);
         one = findViewById(R.id.checkBox3);
         radioGroup3 = findViewById(R.id.radioGroup3);
+
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
@@ -50,48 +48,49 @@ public class MainActivity extends AppCompatActivity {
                 else if (checkedId == rTwo.getId()){
                     i = 190;
                 }
-                else{
+                else if (checkedId == rThree.getId()){
                     i = 170;
                 }
-                textView.setText(String.valueOf(i+j+k));
+                else {
+                    i = 0;
+                }
+                Calculate(i, j, k ,seekBar.getProgress());
             }
         });
         radioGroup3.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
+                j=0;
                 if(checkedId == rFour.getId()){
                     j = 100;
                 }
-                else{
+                else if(checkedId == rFive.getId()){
                     j = 130;
                 }
-                textView.setText(String.valueOf(i+j+k));
+                else {
+                    j = 0;
+                }
+                Calculate(i, j, k ,seekBar.getProgress());
             }
         });
-        one.setOnClickListener(new View.OnClickListener() {
+        one.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onClick(View v) {
-                if(one.isChecked()){
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
                     k = 125;
                 }
                 else{
                     k = 0;
                 }
-                textView.setText(String.valueOf(i+j+k));
+                Calculate(i, j, k ,seekBar.getProgress());
             }
         });
-        if(one.isChecked()){
-            k = 125;
-        }
-        else{
-            k = 0;
-        }
         seekBar.setMax(100);
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                Toast.makeText(MainActivity.this, String.valueOf(k), Toast.LENGTH_SHORT).show();
-                textView.setText(String.valueOf(i+j+k+progress));
+                Calculate(i, j, k ,seekBar.getProgress());
+                textView.setText(String.valueOf(i+j+k+seekBar.getProgress()));
             }
 
             @Override
@@ -107,26 +106,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onSaveInstanceState(@NonNull Bundle outState, @NonNull PersistableBundle outPersistentState) {
-        super.onSaveInstanceState(outState, outPersistentState);
-        outState.putInt("calories", i+j+k+seekBar.getProgress());
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("a", i);
+        outState.putInt("b", j);
+        outState.putInt("c", k);
         outState.putInt("seek", seekBar.getProgress());
-        outState.putBoolean("check", one.isChecked());
     }
 
     @Override
-    public void onRestoreInstanceState(@Nullable Bundle savedInstanceState, @Nullable PersistableBundle persistentState) {
-        super.onRestoreInstanceState(savedInstanceState, persistentState);
-        if(savedInstanceState!=null){
-            seekBar.setProgress(savedInstanceState.getInt("seek"));
-            k = savedInstanceState.getInt("checkbox");
-            boolean check = savedInstanceState.getBoolean("check");
-            if(check){
-                one.setChecked(true);
-                k = 125;
-            }
-            int total = savedInstanceState.getInt("calories") + k;
-            textView.setText(String.valueOf(total));
-        }
+    public void onRestoreInstanceState(@Nullable Bundle savedInstanceState) {
+        assert savedInstanceState != null;
+        super.onRestoreInstanceState(savedInstanceState);
+        seekBar.setProgress(savedInstanceState.getInt("seek"));
+        int l,m,n;
+        l = savedInstanceState.getInt("a");
+        m = savedInstanceState.getInt("b");
+        n = savedInstanceState.getInt("c");
+        Log.i("here", String.valueOf(k));
+        Calculate(l,m,n,savedInstanceState.getInt("seek"));
+    }
+    public void Calculate(int a, int b, int c, int d){
+        textView.setText(String.valueOf(a+b+c+d));
     }
 }
